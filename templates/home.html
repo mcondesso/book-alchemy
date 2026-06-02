@@ -30,12 +30,22 @@
             <a class="sort-link {% if sort_by == 'title' %}active{% endif %}" href="{{ url_for('home', sort_by='title') }}">Title</a>
             <a class="sort-link {% if sort_by == 'author' %}active{% endif %}" href="{{ url_for('home', sort_by='author') }}">Author</a>
           </div>
+          <div class="header-actions">
+            <a href="{{ url_for('add_author') }}" class="btn">Add Author</a>
+            <a href="{{ url_for('add_book') }}" class="btn btn-primary">Add Book</a>
+          </div>
         </div>
 
         <div class="books-grid">
           {% for book in books %}
           <article class="book-card">
-            <div class="book-cover">Cover</div>
+            <div class="book-cover">
+              {% if book.cover_url %}
+                <img src="{{ book.cover_url }}" alt="Cover" class="cover-img">
+              {% else %}
+                <div class="cover-placeholder">Cover</div>
+              {% endif %}
+            </div>
             <div class="book-details">
               <h2>{{ book.title }}</h2>
               <p class="book-meta"><b>Author</b>: {{ book.author.name }}</p>

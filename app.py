@@ -4,6 +4,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 from sqlalchemy import func
 
 from data_models import db, Author, Book
+from isbn_api import fetch_open_library_book_cover_small
 
 
 app = Flask(__name__)
@@ -18,9 +19,6 @@ db.init_app(app)
 @app.route("/")
 def home():
     sort_by = request.args.get("sort_by", "title") or "title"
-    sort_by = sort_by.lower()
-    if sort_by not in {"title", "author"}:
-        sort_by = "title"
     if sort_by == "author":
         books = (
             Book.query.join(Author)
@@ -74,7 +72,11 @@ def add_book():
                 authors=authors,
             )
 
-        book = Book.from_form(form)
+        # fetch cover URL (if any) from Open Library using the ISBN
+        isbn_value = (form.get("isbn") or "").strip()
+        cover_url = fetch_open_library_book_cover_small(isbn_value)
+
+        book = Book.from_form(form, cover_url=cover_url)
         db.session.add(book)
         db.session.commit()
 
@@ -86,5 +88,5 @@ def add_book():
 
 if __name__ == "__main__":
     # with app.app_context():
-    # db.create_all()
+    #     db.create_all()
     app.run(host="0.0.0.0", port=5000, debug=True)

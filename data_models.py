@@ -69,6 +69,7 @@ class Book(db.Model):
     publication_year = db.Column(db.Date, nullable=True)
     author_id = db.Column(db.Integer, db.ForeignKey("authors.id"), nullable=False)
     author = db.relationship("Author", backref="books")
+    cover_url = db.Column(db.String(255), nullable=True)
 
     def __repr__(self):
         return f"Book({self.isbn}, {self.title}, {self.publication_year}, {self.author_id})"
@@ -93,10 +94,11 @@ class Book(db.Model):
         return errors
 
     @classmethod
-    def from_form(cls, form_data):
+    def from_form(cls, form_data, cover_url: str | None = None):
         return cls(
-            isbn=form_data.get("isbn"),
+            isbn=(form_data.get("isbn") or "").strip(),
             title=form_data.get("title"),
             publication_year=parse_date(form_data.get("publication_year")),
             author_id=parse_int(form_data.get("author_id")),
+            cover_url=cover_url,
         )
