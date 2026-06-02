@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+
+  <main class="page-shell">
+    <section class="form-card">
+      <h1>Add a Book</h1>
+
+      {% if errors %}
+      <div class="message error">
+        <ul>
+          {% for field, error in errors.items() %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <form action="/add_book" method="POST">
+        <div class="form-row">
+          <label for="isbn">ISBN</label>
+          <input type="text" id="isbn" name="isbn" value="{{ form.get('isbn') if form else '' }}" required>
+        </div>
+
+        <div class="form-row">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" value="{{ form.get('title') if form else '' }}" required>
+        </div>
+
+        <div class="form-row">
+          <label for="publication_year">Publication Year</label>
+          <input type="date" id="publication_year" name="publication_year" value="{{ form.get('publication_year') if form else '' }}">
+        </div>
+
+        <div class="form-row">
+          <label for="author_id">Author</label>
+          <select id="author_id" name="author_id" required>
+            <option value="">Select an author</option>
+            {% for author in authors %}
+            <option value="{{ author.id }}" {% if form and form.get('author_id') == author.id|string %}selected{% endif %}>{{ author.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit">Add Book</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  </body>
+</html>
