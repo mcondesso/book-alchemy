@@ -100,6 +100,16 @@
   filter: brightness(0.98);
 }
 
+.btn-danger {
+  background: #dc2626;
+  color: white;
+  border-color: transparent;
+}
+
+.btn-danger:hover {
+  filter: brightness(0.95);
+}
+
 .books-grid {
   display: block;
 }
@@ -115,6 +125,13 @@
   min-height: auto;
   max-width: 680px;
   margin-bottom: 1rem;
+  align-items: flex-start;
+}
+
+.book-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: flex-start;
 }
 
 .book-cover {

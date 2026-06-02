@@ -11,7 +11,9 @@ app = Flask(__name__)
 # App Secret key necessary for the the flash mechanism to work
 app.secret_key = os.environ.get("SECRET_KEY", "dev")
 
-library_db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data/library.sqlite")
+library_db_path = os.path.join(
+    os.path.abspath(os.path.dirname(__file__)), "data/library.sqlite"
+)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{library_db_path}"
 db.init_app(app)
 
@@ -33,9 +35,9 @@ def home():
         )
 
     if sort_by == "author":
-        books = (
-            books_query.order_by(func.lower(Author.name), func.lower(Book.title)).all()
-        )
+        books = books_query.order_by(
+            func.lower(Author.name), func.lower(Book.title)
+        ).all()
     else:
         books = books_query.order_by(func.lower(Book.title)).all()
 
@@ -94,6 +96,34 @@ def add_book():
         return redirect(url_for("home"))
 
     return render_template("add_book.html", authors=authors)
+
+
+@app.route("/book/<int:book_id>/delete", methods=["DELETE", "POST"])
+def delete_book(book_id):
+    """Delete a book and remove its author if they have no remaining books."""
+    book = Book.query.get_or_404(book_id)
+    author_id = book.author_id
+    author_name = book.author.name
+    book_title = book.title
+
+    db.session.delete(book)
+    db.session.commit()
+
+    remaining_books = Book.query.filter_by(author_id=author_id).count()
+    if remaining_books == 0:
+        author = Author.query.get(author_id)
+        if author:
+            db.session.delete(author)
+            db.session.commit()
+            flash(
+                f"Book '{book_title}' deleted and author '{author_name}'"
+                " removed because they had no other books.",
+                "success",
+            )
+            return redirect(url_for("home"))
+
+    flash(f"Book '{book_title}' deleted successfully.", "success")
+    return redirect(url_for("home"))
 
 
 if __name__ == "__main__":

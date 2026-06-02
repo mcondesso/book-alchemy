@@ -59,6 +59,16 @@
               <p class="book-meta">Year: {{ book.publication_year if book.publication_year else 'Unknown' }}</p>
               <p class="book-meta">ISBN: {{ book.isbn }}</p>
             </div>
+            <div class="book-actions">
+              <button
+                type="button"
+                class="btn btn-danger delete-book-button"
+                data-book-id="{{ book.id }}"
+                data-book-title="{{ book.title|e }}"
+              >
+                Delete Book
+              </button>
+            </div>
           </article>
           {% else %}
             {% if search_query %}
@@ -71,5 +81,38 @@
       </section>
     </main>
 
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".delete-book-button").forEach(function (button) {
+          button.addEventListener("click", function () {
+            var bookId = button.dataset.bookId;
+            var bookTitle = button.dataset.bookTitle || "this book";
+            if (!confirm('Delete "' + bookTitle + '"? This cannot be undone.')) {
+              return;
+            }
+
+            fetch("/book/" + bookId + "/delete", {
+              method: "DELETE",
+              headers: { "X-Requested-With": "XMLHttpRequest" },
+              credentials: "same-origin",
+            })
+              .then(function (response) {
+                if (response.redirected) {
+                  window.location.href = response.url;
+                } else if (response.ok) {
+                  window.location.href = "{{ url_for('home') }}";
+                } else {
+                  return response.text().then(function (text) {
+                    alert("Unable to delete book: " + text);
+                  });
+                }
+              })
+              .catch(function (error) {
+                alert("Unable to delete book: " + error);
+              });
+          });
+        });
+      });
+    </script>
   </body>
 </html>
