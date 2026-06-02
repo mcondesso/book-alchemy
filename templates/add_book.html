@@ -35,7 +35,7 @@
 
         <div class="form-row">
           <label for="publication_year">Publication Year</label>
-          <input type="date" id="publication_year" name="publication_year" value="{{ form.get('publication_year') if form else '' }}">
+          <input type="number" id="publication_year" name="publication_year" min="1000" max="9999" step="1" value="{{ form.get('publication_year') if form else '' }}" placeholder="e.g. 2025">
         </div>
 
         <div class="form-row">
