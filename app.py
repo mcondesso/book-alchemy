@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask, request, render_template, redirect, url_for, flash
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from data_models import db, Author, Book
 from isbn_api import fetch_open_library_book_cover_small
@@ -19,22 +19,32 @@ db.init_app(app)
 @app.route("/")
 def home():
     sort_by = request.args.get("sort_by", "title") or "title"
-    if sort_by == "author":
-        books = (
-            Book.query.join(Author)
-            .options(db.joinedload(Book.author))
-            .order_by(func.lower(Author.name), func.lower(Book.title))
-            .all()
-        )
-    else:
-        books = (
-            Book.query.join(Author)
-            .options(db.joinedload(Book.author))
-            .order_by(func.lower(Book.title))
-            .all()
+    search_query = (request.args.get("q") or "").strip()
+
+    books_query = Book.query.join(Author).options(db.joinedload(Book.author))
+    if search_query:
+        search_pattern = f"%{search_query}%"
+        books_query = books_query.filter(
+            or_(
+                Book.title.ilike(search_pattern),
+                Author.name.ilike(search_pattern),
+                Book.isbn.ilike(search_pattern),
+            )
         )
 
-    return render_template("home.html", books=books, sort_by=sort_by)
+    if sort_by == "author":
+        books = (
+            books_query.order_by(func.lower(Author.name), func.lower(Book.title)).all()
+        )
+    else:
+        books = books_query.order_by(func.lower(Book.title)).all()
+
+    return render_template(
+        "home.html",
+        books=books,
+        sort_by=sort_by,
+        search_query=search_query,
+    )
 
 
 @app.route("/add_author", methods=["GET", "POST"])

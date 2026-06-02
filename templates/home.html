@@ -25,10 +25,17 @@
             <h1>Library</h1>
             <p>Browse the books in your collection.</p>
           </div>
+          <div class="search-bar">
+            <form action="{{ url_for('home') }}" method="get">
+              <input type="search" name="q" placeholder="Search books by title, author, or ISBN" value="{{ search_query|default('') }}">
+              <input type="hidden" name="sort_by" value="{{ sort_by }}">
+              <button class="btn">Search</button>
+            </form>
+          </div>
           <div class="sort-controls">
             <span>Sort by</span>
-            <a class="sort-link {% if sort_by == 'title' %}active{% endif %}" href="{{ url_for('home', sort_by='title') }}">Title</a>
-            <a class="sort-link {% if sort_by == 'author' %}active{% endif %}" href="{{ url_for('home', sort_by='author') }}">Author</a>
+            <a class="sort-link {% if sort_by == 'title' %}active{% endif %}" href="{{ url_for('home', sort_by='title', q=search_query) }}">Title</a>
+            <a class="sort-link {% if sort_by == 'author' %}active{% endif %}" href="{{ url_for('home', sort_by='author', q=search_query) }}">Author</a>
           </div>
           <div class="header-actions">
             <a href="{{ url_for('add_author') }}" class="btn">Add Author</a>
@@ -49,12 +56,16 @@
             <div class="book-details">
               <h2>{{ book.title }}</h2>
               <p class="book-meta"><b>Author</b>: {{ book.author.name }}</p>
-              <p class="book-meta">Year: {{ book.publication_year.year if book.publication_year else 'Unknown' }}</p>
+              <p class="book-meta">Year: {{ book.publication_year if book.publication_year else 'Unknown' }}</p>
               <p class="book-meta">ISBN: {{ book.isbn }}</p>
             </div>
           </article>
           {% else %}
-          <p class="empty-state">No books have been added yet.</p>
+            {% if search_query %}
+              <p class="empty-state">No books match "{{ search_query }}".</p>
+            {% else %}
+              <p class="empty-state">No books have been added yet.</p>
+            {% endif %}
           {% endfor %}
         </div>
       </section>
