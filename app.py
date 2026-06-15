@@ -3,6 +3,7 @@ from pathlib import Path
 
 from flask import Flask, request, render_template, redirect, url_for, flash
 from sqlalchemy import func, or_
+from sqlalchemy.exc import IntegrityError
 
 from data_models import db, Author, Book
 from isbn_api import fetch_open_library_book_cover_small
@@ -60,7 +61,15 @@ def add_author():
 
         author = Author.from_form(form)
         db.session.add(author)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError as exc:
+            db.session.rollback()
+            if "UNIQUE constraint failed: authors.name" in str(exc):
+                flash("An author with that name already exists.", "error")
+            else:
+                flash("Unable to add author due to a database error.", "error")
+            return render_template("add_author.html", form=form)
 
         flash("Author added successfully", "success")
         return redirect(url_for("home"))
@@ -90,7 +99,19 @@ def add_book():
 
         book = Book.from_form(form, cover_url=cover_url)
         db.session.add(book)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError as exc:
+            db.session.rollback()
+            if "UNIQUE constraint failed: books.isbn" in str(exc):
+                flash("A book with this ISBN already exists.", "error")
+            else:
+                flash("Unable to add book due to a database error.", "error")
+            return render_template(
+                "add_book.html",
+                form=form,
+                authors=authors,
+            )
 
         flash("Book added successfully", "success")
         return redirect(url_for("home"))
