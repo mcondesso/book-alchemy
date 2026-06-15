@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from flask import Flask, request, render_template, redirect, url_for, flash
 from sqlalchemy import func, or_
@@ -11,9 +12,7 @@ app = Flask(__name__)
 # App Secret key necessary for the the flash mechanism to work
 app.secret_key = os.environ.get("SECRET_KEY", "dev")
 
-library_db_path = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)), "data/library.sqlite"
-)
+library_db_path = Path(__file__).resolve().parent / "data" / "library.sqlite"
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{library_db_path}"
 db.init_app(app)
 
