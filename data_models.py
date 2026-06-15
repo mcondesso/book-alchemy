@@ -19,7 +19,7 @@ class Author(db.Model):
     __tablename__ = "authors"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
     birth_date = db.Column(db.Date, nullable=True)
     date_of_death = db.Column(db.Date, nullable=True)
 
@@ -43,10 +43,10 @@ class Author(db.Model):
                 continue
 
             if not column.nullable and not column.default:
-                value = form_data.get(column.name)
+                value = form_data.get(column.name).strip()
                 if not value:
                     errors[column.name] = (
-                        f"{column.name.replace('_', ' ').title()} is required"
+                        f"A non-empty {column.name.replace('_', ' ').title()} is required"
                     )
 
         return errors
@@ -64,7 +64,7 @@ class Book(db.Model):
     __tablename__ = "books"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    isbn = db.Column(db.String(100), nullable=False)
+    isbn = db.Column(db.String(100), nullable=False, unique=True)
     title = db.Column(db.String(100), nullable=False)
     publication_year = db.Column(db.Integer, nullable=True)
     author_id = db.Column(db.Integer, db.ForeignKey("authors.id"), nullable=False)
@@ -85,7 +85,7 @@ class Book(db.Model):
                 continue
 
             if not column.nullable and not column.default:
-                value = form_data.get(column.name)
+                value = form_data.get(column.name).strip()
                 if not value:
                     errors[column.name] = (
                         f"{column.name.replace('_', ' ').title()} is required"
