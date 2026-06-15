@@ -5,10 +5,26 @@ db = SQLAlchemy()
 
 
 def parse_date(value):
+    """Parse a date string in '%Y-%m-%d' format to a date object.
+
+    Args:
+        value: A date string or None.
+
+    Returns:
+        A date object if value is a valid date string, otherwise None.
+    """
     return datetime.strptime(value, "%Y-%m-%d").date() if value else None
 
 
 def parse_int(value):
+    """Parse a value to an integer.
+
+    Args:
+        value: A value to convert to an integer.
+
+    Returns:
+        An integer if conversion is successful, otherwise None.
+    """
     try:
         return int(value)
     except (TypeError, ValueError):
@@ -24,9 +40,11 @@ class Author(db.Model):
     date_of_death = db.Column(db.Date, nullable=True)
 
     def __repr__(self):
+        """Return a developer-friendly string representation of the Author."""
         return f"Author({self.name}, {self.birth_date}, {self.date_of_death})"
 
     def __str__(self):
+        """Return a human-readable string representation of the Author."""
         birth_date_str = (
             self.birth_date.strftime("%Y-%m-%d") if self.birth_date else "Unknown"
         )
@@ -53,6 +71,14 @@ class Author(db.Model):
 
     @classmethod
     def from_form(cls, form_data):
+        """Create an Author instance from form data.
+
+        Args:
+            form_data: Dictionary containing 'name', 'birth_date', and 'date_of_death'.
+
+        Returns:
+            An Author instance with data from the form.
+        """
         return cls(
             name=form_data.get("name"),
             birth_date=parse_date(form_data.get("birth_date")),
@@ -79,6 +105,14 @@ class Book(db.Model):
 
     @classmethod
     def validate(cls, form_data):
+        """Validate Book form data for required fields.
+
+        Args:
+            form_data: Dictionary of form data to validate.
+
+        Returns:
+            Dictionary of field names to error messages. Empty dict if no errors.
+        """
         errors = {}
         for column in cls.__table__.columns:
             if column.primary_key:
@@ -95,6 +129,15 @@ class Book(db.Model):
 
     @classmethod
     def from_form(cls, form_data, cover_url: str | None = None):
+        """Create a Book instance from form data.
+
+        Args:
+            form_data: Dictionary containing 'isbn', 'title', 'publication_year', and 'author_id'.
+            cover_url: Optional URL for the book's cover image.
+
+        Returns:
+            A Book instance with data from the form.
+        """
         return cls(
             isbn=(form_data.get("isbn") or "").strip(),
             title=form_data.get("title"),

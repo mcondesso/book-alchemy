@@ -20,6 +20,7 @@ db.init_app(app)
 
 @app.route("/")
 def home():
+    """Display the home page with a list of books, optionally filtered and sorted."""
     sort_by = request.args.get("sort_by", "title") or "title"
     search_query = (request.args.get("q") or "").strip()
 
